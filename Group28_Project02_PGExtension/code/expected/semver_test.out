@@ -1,0 +1,144 @@
+CREATE EXTENSION semver;
+SELECT '1.2.3'::semver AS version;
+ version 
+---------
+ 1.2.3
+(1 row)
+
+SELECT '1.2'::semver;
+ERROR:  invalid input syntax for type semver: "1.2"
+LINE 1: SELECT '1.2'::semver;
+               ^
+SELECT '1.0.0'::semver < '1.0.1'::semver AS less;
+ less 
+------
+ t
+(1 row)
+
+SELECT '1.0.1'::semver <= '1.0.1'::semver AS less_equal;
+ less_equal 
+------------
+ t
+(1 row)
+
+SELECT '1.2.3'::semver = '1.2.3'::semver AS equal;
+ equal 
+-------
+ t
+(1 row)
+
+SELECT '1.2.3'::semver <> '1.2.4'::semver AS not_equal;
+ not_equal 
+-----------
+ t
+(1 row)
+
+SELECT '2.0.0'::semver >= '1.9.9'::semver AS greater_equal;
+ greater_equal 
+---------------
+ t
+(1 row)
+
+SELECT '1.10.0'::semver > '1.9.0'::semver AS greater;
+ greater 
+---------
+ t
+(1 row)
+
+SELECT major('1.2.3'::semver) AS major;
+ major 
+-------
+     1
+(1 row)
+
+SELECT minor('1.2.3'::semver) AS minor;
+ minor 
+-------
+     2
+(1 row)
+
+SELECT patch('1.2.3'::semver) AS patch;
+ patch 
+-------
+     3
+(1 row)
+
+SELECT bump_minor('1.2.3'::semver) AS bump_minor;
+ bump_minor 
+------------
+ 1.3.0
+(1 row)
+
+SELECT is_compatible('1.5.0'::semver, '1.4.2'::semver) AS compatible;
+ compatible 
+------------
+ t
+(1 row)
+
+CREATE TABLE packages(
+    name text,
+    version semver
+);
+INSERT INTO packages VALUES
+('pkg1', '1.0.0'),
+('pkg2', '2.1.0'),
+('pkg3', '3.0.0'),
+('pkg4', '1.10.0');
+SELECT * FROM packages
+ORDER BY version;
+ name | version 
+------+---------
+ pkg1 | 1.0.0
+ pkg4 | 1.10.0
+ pkg2 | 2.1.0
+ pkg3 | 3.0.0
+(4 rows)
+
+SELECT MAX(version) AS max_version
+FROM packages;
+ max_version 
+-------------
+ 3.0.0
+(1 row)
+
+SELECT MIN(version) AS min_version
+FROM packages;
+ min_version 
+-------------
+ 1.0.0
+(1 row)
+
+SELECT name, version, bump_minor(version) AS next_minor
+FROM packages
+WHERE is_compatible(version, '1.0.0'::semver)
+ORDER BY version;
+ name | version | next_minor 
+------+---------+------------
+ pkg1 | 1.0.0   | 1.1.0
+ pkg4 | 1.10.0  | 1.11.0
+(2 rows)
+
+SELECT '2.3.4'::text::semver AS cast_to_semver;
+ cast_to_semver 
+----------------
+ 2.3.4
+(1 row)
+
+SELECT '2.3.4'::semver::text AS cast_to_text;
+ cast_to_text 
+--------------
+ 2.3.4
+(1 row)
+
+CREATE INDEX packages_version_idx
+ON packages USING btree (version);
+SELECT name
+FROM packages
+WHERE version >= '2.0.0'::semver
+ORDER BY version;
+ name 
+------
+ pkg2
+ pkg3
+(2 rows)
+
