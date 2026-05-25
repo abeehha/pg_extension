@@ -1,0 +1,943 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 5 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+6 0 obj
+<< /Length 1421 >>
+stream
+0.10 0.32 0.42 RG
+2 w
+54 754 m 558 754 l S
+0 0 0 rg
+BT
+0.06 0.24 0.34 rg
+/F4 22 Tf
+54 690 Td
+(Semver PostgreSQL Extension) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 12 Tf
+54 664 Td
+(Design Document) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 626 Td
+(Group 28) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 600 Td
+(Abeeha \(BSCS24010\)) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 582 Td
+(Maha Faisal \(BSCS24048\)) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 564 Td
+(Musa Hassan Khan \(BSCS24098\)) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 520 Td
+(C extension for semantic version values, comparison operators, aggregates, indexing, casts, and regression tests.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 466 Td
+(Required topics covered) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 447 Td
+(1. Extension file structure) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 428 Td
+(2. PG_MODULE_MAGIC and PGXS) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 409 Td
+(3. In-memory semver representation) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 390 Td
+(4. Comparison helper design) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 371 Td
+(5. SQL registration pattern) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 352 Td
+(6. Regression test strategy) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 333 Td
+(7. Design decision discussion) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+72 314 Td
+(8. Detailed bonus implementation) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 9 Tf
+520 38 Td
+(Page 1) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F3 3 0 R /F4 4 0 R /F5 5 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 4733 >>
+stream
+0.10 0.32 0.42 RG
+2 w
+54 754 m 558 754 l S
+0 0 0 rg
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 730 Td
+(1. Extension Structure) Tj
+ET
+0.70 0.70 0.70 RG
+54 722 m 558 722 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 702 Td
+(The extension is split across the standard PostgreSQL extension files. Each file has one) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 687.5 Td
+(clear responsibility, which keeps the C implementation, SQL registration, build system,) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 673.0 Td
+(and tests separate.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 653.5 Td
+(Makefile: uses PGXS to compile semver.c into the shared library semver.so, install) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 639.0 Td
+(semver--1.0.sql and semver.control, and register the regression test named semver_test.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 619.5 Td
+(semver.control: declares extension metadata such as the default version, relocatability,) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 605.0 Td
+(comment, and module_pathname. PostgreSQL uses this file when CREATE EXTENSION semver is) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 590.5 Td
+(executed.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 571.0 Td
+(semver.c: contains the C implementation. It defines the in-memory struct, input/output) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 556.5 Td
+(functions, comparison functions, utility functions, aggregate transition functions, and) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 542.0 Td
+(cast wrappers.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 522.5 Td
+(semver--1.0.sql: connects SQL names to C symbols. It creates the semver type, registers) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 508.0 Td
+(functions, operators, aggregates, casts, and the B-tree operator class.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 488.5 Td
+(sql/semver_test.sql and expected/semver_test.out: form the regression test pair used by) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 474.0 Td
+(make installcheck. demo.sql is a separate manual demo script for showing the extension) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 459.5 Td
+(behavior interactively.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 431.0 Td
+(2. Magic Block and PGXS) Tj
+ET
+0.70 0.70 0.70 RG
+54 423.0 m 558 423.0 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 403.0 Td
+(semver.c includes PG_MODULE_MAGIC. This macro places PostgreSQL module metadata inside) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 388.5 Td
+(the compiled shared library. When PostgreSQL loads semver.so, it checks this metadata to) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 374.0 Td
+(confirm that the library was compiled for a compatible PostgreSQL server interface.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 354.5 Td
+(Without the magic block, PostgreSQL may reject the shared library because it cannot) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 340.0 Td
+(safely verify the extension module layout. It is a small line of code, but it is part of) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 325.5 Td
+(the contract between a C extension and the PostgreSQL server.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 306.0 Td
+(The Makefile uses PGXS through pg_config --pgxs. PGXS supplies the PostgreSQL build) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 291.5 Td
+(rules, compiler flags, include paths, library installation paths, and regression test) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 277.0 Td
+(targets. This avoids hard-coding PostgreSQL installation directories and makes the) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 262.5 Td
+(project build like a normal PostgreSQL extension.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 234.0 Td
+(3. In-Memory Representation) Tj
+ET
+0.70 0.70 0.70 RG
+54 226.0 m 558 226.0 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 206.0 Td
+(The semver value is stored as a fixed-width C struct:) Tj
+ET
+BT
+0.20 0.20 0.20 rg
+/F5 10.5 Tf
+66 186.5 Td
+(typedef struct { int32 major; int32 minor; int32 patch; } Semver;) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 167.0 Td
+(The SQL type is registered with INTERNALLENGTH = 12 and ALIGNMENT = int4, matching three) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 152.5 Td
+(4-byte integer fields. A value such as 1.2.3 is stored as major = 1, minor = 2, and) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 138.0 Td
+(patch = 3.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 118.5 Td
+(The input function semver_in receives a cstring and parses the required) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 104.0 Td
+(major.minor.patch format. If the string is malformed, it raises an ereport error. The) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 89.5 Td
+(output function semver_out formats the three stored fields back into a display string) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 9 Tf
+520 38 Td
+(Page 2) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F3 3 0 R /F4 4 0 R /F5 5 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 4633 >>
+stream
+0.10 0.32 0.42 RG
+2 w
+54 754 m 558 754 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 730 Td
+(such as 1.2.3.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 710.5 Td
+(This representation is compact, easy to compare, and independent of the original input) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 696.0 Td
+(text. It stores the semantic data rather than a string representation.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 667.5 Td
+(4. Comparison Helper) Tj
+ET
+0.70 0.70 0.70 RG
+54 659.5 m 558 659.5 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 639.5 Td
+(All ordering logic is centralized in semver_compare. It compares major first, then) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 625.0 Td
+(minor, then patch. The first field that differs determines the result.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 605.5 Td
+(This is the most important correctness point in the extension. Semantic versions must) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 591.0 Td
+(compare numerically by component, not lexicographically as strings. For example, 1.10.0) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 576.5 Td
+(is greater than 1.9.0 because 10 is greater than 9 in the minor field.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 557.0 Td
+(The six SQL comparison functions are thin wrappers over this helper: semver_lt,) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 542.5 Td
+(semver_le, semver_eq, semver_ne, semver_ge, and semver_gt. The semver_cmp function) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 528.0 Td
+(returns an int4 comparison value and is used by the B-tree operator class.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 499.5 Td
+(5. SQL Registration Pattern) Tj
+ET
+0.70 0.70 0.70 RG
+54 491.5 m 558 491.5 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 471.5 Td
+(The SQL registration file follows the standard PostgreSQL C-extension pattern. First it) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 457.0 Td
+(creates a shell type with CREATE TYPE semver. Then it registers semver_in and semver_out) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 442.5 Td
+(as C functions. Finally it completes the type definition by assigning those functions as) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 428.0 Td
+(INPUT and OUTPUT.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 408.5 Td
+(After the type exists, the script registers the remaining C functions using CREATE) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 394.0 Td
+(FUNCTION ... AS 'MODULE_PATHNAME', 'c_symbol'. MODULE_PATHNAME is replaced by PostgreSQL) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 379.5 Td
+(with the installed shared library path.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 360.0 Td
+(The comparison operators are registered with CREATE OPERATOR and linked to their C) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 345.5 Td
+(functions. The aggregate functions max\(semver\) and min\(semver\) are built from) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 331.0 Td
+(semver_larger and semver_smaller transition functions.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 302.5 Td
+(6. Regression Test Strategy) Tj
+ET
+0.70 0.70 0.70 RG
+54 294.5 m 558 294.5 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 274.5 Td
+(The regression test is designed to prove both normal behavior and important edge cases.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 260.0 Td
+(It checks basic input/output with SELECT '1.2.3'::semver and checks malformed input) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 245.5 Td
+(using an incomplete version such as 1.2, expecting the exact SQL error produced by) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 231.0 Td
+(ereport.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 211.5 Td
+(It exercises all six comparison operators, including 1.10.0 > 1.9.0, which verifies that) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 197.0 Td
+(comparison is numeric and field-by-field rather than string-based. It also checks the) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 182.5 Td
+(five utility functions: major, minor, patch, bump_minor, and is_compatible.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 163.0 Td
+(Table behavior is tested by inserting semver values into a packages table, sorting with) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 148.5 Td
+(ORDER BY, and computing MAX and MIN aggregates. A combined query uses is_compatible) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 134.0 Td
+(together with bump_minor and ORDER BY to show that multiple extension features work) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 119.5 Td
+(together.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 100.0 Td
+(Bonus behavior is included without making the regression test overly brittle: explicit) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 9 Tf
+520 38 Td
+(Page 3) Tj
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F3 3 0 R /F4 4 0 R /F5 5 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 4917 >>
+stream
+0.10 0.32 0.42 RG
+2 w
+54 754 m 558 754 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 730 Td
+(casts are tested in both directions, and CREATE INDEX USING btree confirms that) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 715.5 Td
+(PostgreSQL accepts the semver type for B-tree indexing.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 687.0 Td
+(7. Design Decision: Three int32 Fields) Tj
+ET
+0.70 0.70 0.70 RG
+54 679.0 m 558 679.0 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 659.0 Td
+(A major design decision was to store semantic versions as a struct of three int32 fields) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 644.5 Td
+(instead of packing the version into a single int64 or storing the original string.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 625.0 Td
+(The struct mirrors the problem directly: semantic versions have a major, minor, and) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 610.5 Td
+(patch component. This makes parsing straightforward, makes the comparison helper) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 596.0 Td
+(readable, and avoids artificial bit-width choices that would be required for an int64) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 581.5 Td
+(packing scheme.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 562.0 Td
+(Packing into a single integer could make comparison compact, but it would require) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 547.5 Td
+(deciding how many bits each component receives and what to do when a component exceeds) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 533.0 Td
+(that range. Storing the original string would preserve formatting, but every comparison) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 518.5 Td
+(would need repeated parsing or careful string handling.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 499.0 Td
+(The three-field struct is therefore the clearest fit for this assignment. It is compact,) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 484.5 Td
+(fixed-width, easy to register with PostgreSQL, and directly supports the numeric) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 470.0 Td
+(comparison rules required by semantic versions.) Tj
+ET
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 441.5 Td
+(8. Bonus Features) Tj
+ET
+0.70 0.70 0.70 RG
+54 433.5 m 558 433.5 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 413.5 Td
+(Bonus 10.1: B-tree Operator Class for Indexing. The extension registers semver_ops as) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 399.0 Td
+(the default B-tree operator class for the semver type. This lets PostgreSQL build normal) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 384.5 Td
+(B-tree indexes on semver columns with CREATE INDEX packages_version_idx ON packages) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 370.0 Td
+(USING btree \(version\).) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 350.5 Td
+(The operator class maps the semver comparison operators to PostgreSQL's B-tree strategy) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 336.0 Td
+(numbers: strategy 1 is <, strategy 2 is <=, strategy 3 is =, strategy 4 is >=, and) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 321.5 Td
+(strategy 5 is >. It also provides semver_cmp as support function 1, which gives) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 307.0 Td
+(PostgreSQL the three-way comparison result needed by the B-tree access method.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 287.5 Td
+(This bonus depends on the base comparison implementation being correct. Since semver_cmp) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 273.0 Td
+(uses semver_compare, indexed ordering follows the same numeric field-by-field rules as) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 258.5 Td
+(ORDER BY and the comparison operators. The demo.sql file includes an EXPLAIN query with) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 244.0 Td
+(enable_seqscan disabled so the output shows an Index Scan using the semver index.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 224.5 Td
+(Bonus 10.3: Custom Casts to and from text. The extension registers explicit casts in) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 210.0 Td
+(both directions: text AS semver and semver AS text. The text_to_semver wrapper parses a) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 195.5 Td
+(text value into the internal semver representation, while semver_to_text formats the) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 181.0 Td
+(stored fields back into a PostgreSQL text value.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 161.5 Td
+(These casts make the type easier to use with existing tables and text data. For example,) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 147.0 Td
+(users can write some_text_column::semver when importing version strings, and) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 132.5 Td
+(semver_value::text when exporting or displaying values as ordinary text. The regression) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 118.0 Td
+(test includes both '2.3.4'::text::semver and '2.3.4'::semver::text.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 9 Tf
+520 38 Td
+(Page 4) Tj
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F3 3 0 R /F4 4 0 R /F5 5 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 664 >>
+stream
+0.10 0.32 0.42 RG
+2 w
+54 754 m 558 754 l S
+0 0 0 rg
+BT
+0.09 0.28 0.38 rg
+/F4 14 Tf
+54 730 Td
+(9. Limitations) Tj
+ET
+0.70 0.70 0.70 RG
+54 722 m 558 722 l S
+0 0 0 rg
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 702 Td
+(The implementation supports only numeric major.minor.patch versions. It does not) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 687.5 Td
+(implement pre-release labels or build metadata.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 668.0 Td
+(The stored value is normalized to three integer fields, so the original input formatting) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 10.5 Tf
+54 653.5 Td
+(is not preserved.) Tj
+ET
+BT
+0.08 0.08 0.08 rg
+/F3 9 Tf
+520 38 Td
+(Page 5) Tj
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F3 3 0 R /F4 4 0 R /F5 5 0 R >> >> /Contents 14 0 R >>
+endobj
+xref
+0 16
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000148 00000 n 
+0000000218 00000 n 
+0000000293 00000 n 
+0000000361 00000 n 
+0000001834 00000 n 
+0000001980 00000 n 
+0000006765 00000 n 
+0000006911 00000 n 
+0000011597 00000 n 
+0000011745 00000 n 
+0000016715 00000 n 
+0000016863 00000 n 
+0000017579 00000 n 
+trailer
+<< /Size 16 /Root 1 0 R >>
+startxref
+17727
+%%EOF
